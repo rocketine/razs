@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tournament Style X/Y Game</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: url("Razs.jpg") center/cover no-repeat;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    padding: 22px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+  }
+
+  h2 { margin: 0 0 8px; font-size: 22px; }
+  p#question { margin: 12px 0 20px; font-size: 18px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .12s ease, opacity .12s ease;
+  }
+
+  .btn-left {  background: linear-gradient(135deg, #90CDF4, #63B3ED);  color:#012; }
+  .btn-right {   background: linear-gradient(135deg, #90CDF4, #63B3ED);color:#021; }
+
+  .btn:active { transform: scale(.98); }
+
+ 
+
+  .winner-label {
+    margin-top: 12px;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .small {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .final {
+  display: none;
+  text-align: center;      /* center everything inside */
+}
+
+.qr {
+  display: block;          /* ensures center alignment */
+  margin: 20px auto;       /* centers the QR image */
+  width: 220px;
+  height: 220px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+}
+
+.restart {
+  margin: 20px auto 0;     /* adds spacing above and centers the button */
+  padding: 10px 16px;
+  display: block;          /* ensures it's centered */
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 16px;
+}
+
+
+  @media (max-width:400px){
+    h2{ font-size:20px }
+    p#question{ font-size:16px }
+    .btn{ font-size:16px; padding:12px }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="game">
+  <h2 id="round-title">Round 1</h2>
+  <p id="question">Choose the winner</p>
+
+  <!-- IMPORTANT: pass 1 for left (champion) and 2 for right (challenger) -->
+  <button class="btn btn-left" id="btn1" onclick="choose(1)"></button>
+  <div class="small" id="hint">թե</div>
+  <button class="btn btn-right" id="btn2" onclick="choose(2)"></button>
+
+  
+</div>
+
+<div class="card final" id="final">
+  <h2>Դուք ավարտեցիք այս խաղը!</h2>
+  <p class="small">Ձեր ընտրությունն է</p>
+  <div class="winner-label" id="finalWinner"></div>
+  <p style="font-size:16px; margin-top:10px">
+  Եթե տեսնում եք  QR-ը սկանավորեք <br/>այլապես լավ չես խաղում ախպերս, նորից</p>
+
+  <!-- Replace data parameter with your reveal URL -->
+  <img class="qr" id="qrImg"
+       src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://example.com" alt="QR code">
+
+  <button class="restart" onclick="restart()">↺ նորից</button>
+</div>
+
+<script>
+  // ===== Customize your items here =====
+  const items = [
+    "Lilit Hovhannisyan",
+    "Brunet",
+    "Misho",
+    "Vnas",
+    "1 mln salary",
+    "Sev ikra",
+    "the best americano",
+    "indz unecoxnern en baxtavor",
+    "CHE",
+    "Cexaspanutyun 2",
+    "Jag",
+    "Art all day",
+    "Kar",
+    "Nahapet",
+    "Abu hakobi 1 month subscription",
+    "qveshn discusED WITH GRAHAM",
+    "Day off",
+    "off",
+    "👍",
+    "Granula",
+    "SIRUN TXA ALEN DELON",
+    "Dublyor Breda Pitta v seriale Boycovskiy Klub",
+    "es sirt chunem",
+    "es gexecik em lrum",
+    "ara Razs mi kdri",
+    "cnundid pizzan"
+  ];
+  // =====================================
+
+  // state
+  let champion = items[0];        // current winner (the one that carries forward)
+  let challengerIndex = 1;       // index of the next challenger in items[]
+
+  function loadRound() {
+    // If no more challengers, show final screen
+    
+    if (challengerIndex >= items.length) {
+    document.getElementById("game").style.display = "none";
+    document.getElementById("finalWinner").innerText = champion;
+
+    const qrImg = document.getElementById("qrImg");
+
+    if (champion === "cnundid pizzan") {
+        // Show QR
+        qrImg.style.display = "block";
+    } else {
+        // Hide QR
+        qrImg.style.display = "none";
+    }
+
+    document.getElementById("final").style.display = "block";
+    return;
+}
+
+
+    const challenger = items[challengerIndex];
+
+    document.getElementById("round-title").innerText = `Ռաունդ ${challengerIndex}`;
+    document.getElementById("question").innerText = "Խեպի բյողզդեյ թու աուըր Sanpachiked ընգեր!!!";
+    document.getElementById("btn1").innerText = champion;      // left = current champion
+    document.getElementById("btn2").innerText = challenger;   // right = challenger
+  }
+
+  // option: 1 = left (champion), 2 = right (challenger)
+  function choose(option) {
+    // If user picks challenger (right button), challenger becomes new champion
+    if (option === 2) {
+      champion = items[challengerIndex];
+    }
+    // If user picks option 1, champion remains as-is
+    // Move on to next challenger (so champion will face the next item)
+    challengerIndex++;
+    loadRound();
+  }
+
+  function restart() {
+    champion = items[0];
+    challengerIndex = 1;
+    document.getElementById("final").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    loadRound();
+  }
+
+  // initial draw
+  loadRound();
+</script>
+
+</body>
+</html>
